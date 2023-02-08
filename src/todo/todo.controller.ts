@@ -2,6 +2,7 @@ import { CreateTodoDto } from './application/dto/create-todo.dto';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -9,18 +10,19 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { Todo } from 'src/todo/domain/entity/todo.schema';
 import { TodoService } from './application/services/todo.service';
 import { GetUser } from 'src/auth/common/get-user.dacorator';
 import { User } from 'src/auth/domain/entity/user.entity';
 import { AuthGuard } from '@nestjs/passport';
+import { ObjectId } from 'mongoose';
 
 @Controller('todo')
+@UseGuards(AuthGuard())
 export class TodoController {
   constructor(private todoService: TodoService) {}
 
-  @Get('/:userid')
-  async getTodo(@Param('userid') todoId: string) {
+  @Get('/:todoid')
+  async getTodo(@Param('todoid') todoId: ObjectId) {
     return this.todoService.getTodoById(todoId);
   }
 
@@ -35,8 +37,12 @@ export class TodoController {
     return this.todoService.getTodo();
   }
 
+  @Delete('/:todoid')
+  async deleteTodo(@Param('todoId') id: ObjectId) {
+    return this.todoService.deleteTodo(id);
+  }
+
   @Post()
-  @UseGuards(AuthGuard())
   async createTodo(
     @Body() createTodoDto: CreateTodoDto,
     @GetUser() user: User,
@@ -46,9 +52,9 @@ export class TodoController {
 
   @Patch('/:todoId')
   async updateTodo(
-    @Param('todoId') todoId: string,
+    @Param('todoId') id: ObjectId,
     @Body() updateTodo: CreateTodoDto,
   ) {
-    return this.todoService.updateTodo(todoId, updateTodo);
+    return this.todoService.updateTodo(id, updateTodo);
   }
 }

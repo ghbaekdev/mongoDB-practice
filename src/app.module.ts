@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/test'),
+    // MongooseModule.forRoot('mongodb://localhost/test'),
     TodoModule,
     AuthModule,
     TypeOrmModule.forRoot({

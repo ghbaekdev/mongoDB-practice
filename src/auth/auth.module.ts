@@ -13,7 +13,7 @@ import { MongoRepository } from 'typeorm';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'user', schema: UserSchema }]),
+    // MongooseModule.forFeature([{ name: 'user', schema: UserSchema }]),
     JwtModule.register({
       secret: '1234',
       signOptions: {
@@ -23,7 +23,7 @@ import { MongoRepository } from 'typeorm';
     TypeOrmModule.forFeature([User]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
-  providers: [AuthService, JwtStrategy, AuthRepository, MongoRepository],
+  providers: [AuthService, JwtStrategy, MongoRepository],
   controllers: [AuthController],
   exports: [JwtStrategy, PassportModule],
 })

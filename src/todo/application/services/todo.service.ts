@@ -1,11 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ObjectId } from 'mongoose';
 import { User } from 'src/auth/domain/entity/user.entity';
 import { Todo } from 'src/todo/domain/entity/todo.entity';
-
-import { MongoRepository } from 'typeorm';
-import { TodoRepository } from '../../todo.repository';
-
+import { LessThan, MongoRepository } from 'typeorm';
 import { CreateTodoDto } from '../dto/create-todo.dto';
 // import { User } from 'src/auth/domain/entity/user.entity';
 
@@ -17,9 +15,9 @@ export class TodoService {
     private todoRepository: MongoRepository<Todo>,
   ) {}
 
-  async getTodoById(id: string) {
-    const found = await this.todoRepository.findOneBy({ id });
-    console.log(found);
+  async getTodoById(id: ObjectId) {
+    const found = await this.todoRepository.findOneBy(id);
+    return found;
   }
 
   async getTodo() {
@@ -28,31 +26,35 @@ export class TodoService {
 
   async createTodo(todo: CreateTodoDto, user: User) {
     const { title, description } = todo;
-    // return this.todoRepository.create({
-    //   title: todo.title,
-    //   description: todo.description,
-    //   name: todo.title,
-    // });
     const result = this.todoRepository.create({
       title,
       description,
       user,
     });
-
-    await this.todoRepository.save(result);
+    return await this.todoRepository.save(result);
   }
 
-  async updateTodo(todoId: string, updateTodoDto: CreateTodoDto) {
-    return this.todoRepository.findOneAndUpdate({ todoId }, updateTodoDto);
+  async updateTodo(id: ObjectId, updateTodoDto: CreateTodoDto) {
+    return await this.todoRepository.findOneAndUpdate(
+      { id },
+      { title: updateTodoDto.title, description: updateTodoDto.description },
+    );
+  }
+
+  async deleteTodo(id: ObjectId) {
+    const result = await this.todoRepository.deleteOne({ id });
+    console.log(result);
+    if (!result) {
+      throw new NotFoundException(`이 아이디는 찾을 수 없음.${id}`);
+    }
   }
 
   async filterTodo(startDate: string, endDate: string) {
-    // return this.todoRepository.find({
-    //   createdAt: {
-    //     $gte: startDate,
-    //     $lte: endDate,
-    //   },
-    // });
-    return 'say';
+    return await this.todoRepository.findBy({
+      createdAt: {
+        $gte: new Date(startDate),
+        $lt: new Date(endDate),
+      },
+    });
   }
 }
