@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongoose';
 import { User } from 'src/auth/domain/entity/user.entity';
 import { Todo } from 'src/todo/domain/entity/todo.entity';
-import { LessThan, MongoRepository } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import { CreateTodoDto } from '../dto/create-todo.dto';
 // import { User } from 'src/auth/domain/entity/user.entity';
 
@@ -35,18 +35,26 @@ export class TodoService {
   }
 
   async updateTodo(id: ObjectId, updateTodoDto: CreateTodoDto) {
-    return await this.todoRepository.findOneAndUpdate(
+    const result = await this.todoRepository.updateOne(
       { id },
-      { title: updateTodoDto.title, description: updateTodoDto.description },
+      {
+        $set: {
+          title: updateTodoDto.title,
+          description: updateTodoDto.description,
+        },
+      },
     );
+    console.log(result);
+    return result;
   }
 
   async deleteTodo(id: ObjectId) {
-    const result = await this.todoRepository.deleteOne({ id });
+    const result = await this.todoRepository.findOneAndDelete({ id });
     console.log(result);
     if (!result) {
       throw new NotFoundException(`이 아이디는 찾을 수 없음.${id}`);
     }
+    return result;
   }
 
   async filterTodo(startDate: string, endDate: string) {

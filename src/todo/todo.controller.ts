@@ -38,7 +38,8 @@ export class TodoController {
   }
 
   @Delete('/:todoid')
-  async deleteTodo(@Param('todoId') id: ObjectId) {
+  async deleteTodo(@Param('todoid') id: ObjectId) {
+    console.log(id);
     return this.todoService.deleteTodo(id);
   }
 
